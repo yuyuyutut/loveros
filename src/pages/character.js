@@ -1,0 +1,5 @@
+import { state, update } from '../state.js';
+import { status, topbar, esc, toast } from '../ui.js';
+window.actions ??= {};
+window.actions.saveCharacter = () => { update({ character:{ name:cName.value.trim()||'阿临', tagline:cTagline.value.trim(), persona:cPersona.value.trim(), greeting:cGreeting.value.trim() } }); toast('角色卡已保存'); };
+export function CharacterPage(){ const c=state.character; return `<section class="screen">${status('<span class="pill">角色卡</span>')}${topbar('角色卡','决定 TA 怎么与你相处')}<div class="content"><div class="card"><div class="label">名字</div><input class="field" id="cName" value="${esc(c.name)}"><div class="label">一句话介绍</div><input class="field" id="cTagline" value="${esc(c.tagline)}"><div class="label">人设 / 关系设定</div><textarea class="field" id="cPersona">${esc(c.persona)}</textarea><div class="label">开场白</div><textarea class="field" id="cGreeting">${esc(c.greeting)}</textarea><button class="btn primary" data-action="saveCharacter" style="margin-top:10px">保存角色卡</button></div><div class="card tiny muted">角色卡会真实进入聊天 system prompt。修改后下一次请求模型就会生效。</div></div><div class="homebar"></div></section>`; }

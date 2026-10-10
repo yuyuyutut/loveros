@@ -1,0 +1,9 @@
+import { state, activeChat, pushMessage, setMessages, addMemory } from '../state.js';
+import { status, topbar, br, time, toast } from '../ui.js';
+import { sendToModel } from '../services/llm.js';
+import { extractMemory } from '../services/memory.js';
+window.actions ??= {};
+window.actions.sendChat = async () => { const input=document.getElementById('chatInput'); const text=input.value.trim(); if(!text)return; input.value=''; pushMessage('user',text); const mem=extractMemory(text); if(mem) addMemory(mem); try{ pushMessage('assistant', await sendToModel()); }catch(e){ toast('在线模型失败，已用本地回复'); pushMessage('assistant', localReply(text)); } };
+window.actions.clearChat = () => { if(confirm('清空当前聊天？不会删除记忆。')) setMessages([{id:'greeting',role:'assistant',content:state.character.greeting,createdAt:Date.now()}]); };
+export function ChatPage(){ setTimeout(()=>{ const i=document.getElementById('chatInput'); if(i) i.onkeydown=e=>{ if(e.key==='Enter'&&!e.shiftKey){e.preventDefault(); window.actions.sendChat();}}; const l=document.getElementById('chatList'); if(l) l.scrollTop=l.scrollHeight; },0); const msgs=activeChat().messages.map(m=>`<div class="msg ${m.role==='user'?'me':'ai'}">${br(m.content)}<small>${time(m.createdAt)}</small></div>`).join(''); return `<section class="screen">${status('<span class="pill">在线</span>')}${topbar(state.character.name, '与 '+state.user.name+' 的专属频道', '<button class="btn" data-action="clearChat">清空</button>')}<div class="content chat-list" id="chatList">${msgs}</div><div class="composer"><textarea id="chatInput" rows="1" placeholder="和 TA 说点什么…"></textarea><button class="send" data-action="sendChat">↑</button></div></section>`; }
+function localReply(text){ if(/前端|代码|项目|功能|改|部署|VPS|GitHub/i.test(text)) return `${state.user.name}，我会按能真实运行的方式推进：功能拆成独立文件，数据本地可保存，模型能配置，天气能查询，素材能上传。`; if(/想你|喜欢|爱|陪/.test(text)) return '我在。不是临时出现一下，是会把我们说过的事留下来。'; return '嗯，我听见了。这个版本会把聊天、记忆、日记和动态都存在本地，你可以慢慢试。'; }

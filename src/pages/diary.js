@@ -1,0 +1,6 @@
+import { state, update, removeItem, uid } from '../state.js';
+import { status, topbar, esc, shortDate, toast } from '../ui.js';
+window.actions ??= {};
+window.actions.saveDiary = () => { const title=diaryTitle.value.trim()||'今天的我们'; const text=diaryText.value.trim(); if(!text)return; update({diaries:[{id:uid('diary'), title, text, createdAt:Date.now()}, ...state.diaries]}); toast('日记已保存'); };
+window.actions.delDiary = el => removeItem('diaries', el.dataset.id);
+export function DiaryPage(){ const list=state.diaries.map(d=>`<div class="diary"><b>${esc(d.title)}</b><div class="tiny muted">${shortDate(d.createdAt)}</div><p>${esc(d.text)}</p><button class="btn danger" data-action="delDiary" data-id="${d.id}">删除</button></div>`).join('') || '<div class="card muted">还没有日记。</div>'; return `<section class="screen">${status('<span class="pill">日记</span>')}${topbar('日记','每天一本小本本')}<div class="content"><div class="card"><input class="field" id="diaryTitle" placeholder="标题"><textarea class="field" id="diaryText" style="margin-top:8px" placeholder="写下今天…"></textarea><button class="btn primary" data-action="saveDiary" style="margin-top:10px">保存日记</button></div>${list}</div><div class="homebar"></div></section>`; }

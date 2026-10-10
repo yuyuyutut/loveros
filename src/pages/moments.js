@@ -1,0 +1,6 @@
+import { state, update, removeItem, uid } from '../state.js';
+import { status, topbar, esc, toast } from '../ui.js';
+window.actions ??= {};
+window.actions.postMoment = () => { const text=momentText.value.trim(); if(!text)return; update({ moments:[{id:uid('moment'), author:state.character.name, text, createdAt:Date.now()}, ...state.moments] }); toast('动态已发布'); };
+window.actions.delMoment = el => removeItem('moments', el.dataset.id);
+export function MomentsPage(){ const list=state.moments.map(m=>`<div class="moment"><b>${esc(m.author)}</b><div class="tiny muted">${new Date(m.createdAt).toLocaleString('zh-CN')}</div><p>${esc(m.text)}</p><div class="row"><span class="muted">♡ 评论</span><button class="btn danger" data-action="delMoment" data-id="${m.id}">删除</button></div></div>`).join('') || '<div class="card muted">还没有动态。</div>'; return `<section class="screen">${status('<span class="pill">动态</span>')}${topbar('动态','像朋友圈一样留下生活痕迹')}<div class="content"><div class="card"><textarea class="field" id="momentText" placeholder="写一条动态…"></textarea><button class="btn primary" data-action="postMoment" style="margin-top:10px">发布动态</button></div>${list}</div><div class="homebar"></div></section>`; }

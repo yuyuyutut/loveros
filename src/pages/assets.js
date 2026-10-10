@@ -1,0 +1,8 @@
+import { state, update, removeItem, uid } from '../state.js';
+import { status, topbar, toast } from '../ui.js';
+import { compressImage } from '../services/image.js';
+window.actions ??= {};
+window.actions.setAvatar = el => { const a=state.assets.find(x=>x.id===el.dataset.id); update({character:{avatar:a.src}}); toast('头像已更新'); };
+window.actions.setWallpaper = el => { const a=state.assets.find(x=>x.id===el.dataset.id); update({character:{wallpaper:a.src}}); toast('壁纸已更新'); };
+window.actions.delAsset = el => removeItem('assets', el.dataset.id);
+export function AssetsPage(){ setTimeout(()=>{ const f=document.getElementById('assetFile'); if(f) f.onchange=async e=>{ const file=e.target.files[0]; if(!file)return; const src=await compressImage(file); update({assets:[{id:uid('asset'), name:file.name, src, createdAt:Date.now()}, ...state.assets]}); toast('图片已保存'); }; },0); const list=state.assets.map(a=>`<div class="asset"><img src="${a.src}"><div class="row"><button class="btn" data-action="setAvatar" data-id="${a.id}">头像</button><button class="btn" data-action="setWallpaper" data-id="${a.id}">壁纸</button><button class="btn danger" data-action="delAsset" data-id="${a.id}">删</button></div></div>`).join('') || '<div class="card muted" style="grid-column:1/-1">还没有素材。</div>'; return `<section class="screen">${status('<span class="pill">素材</span>')}${topbar('素材库','上传图片，设头像或壁纸')}<div class="content"><div class="card"><input class="field" type="file" accept="image/*" id="assetFile"><p class="tiny muted">会在浏览器本地压缩保存。之后可替换为 Supabase/VPS 上传服务。</p></div><div class="asset-grid">${list}</div></div><div class="homebar"></div></section>`; }
